@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automated Sudoku Solver - Backtracking in C</title>
+    <!-- Google Fonts for premium typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="glass-bg-glow"></div>
+    <div class="container">
+        <header>
+            <div class="header-logo">
+                <i class="fa-solid fa-table-cells"></i>
+                <h1>SUDOKU <span class="accent-text">SOLVER</span></h1>
+            </div>
+            <p class="subtitle">Backtracking Algorithm in C + Python Flask Bridge</p>
+        </header>
+
+        <main class="main-content">
+            <section class="solver-section">
+                <!-- 9x9 Sudoku Grid Container -->
+                <div class="grid-wrapper">
+                    <div id="sudoku-grid" class="sudoku-grid">
+                        <!-- Grid cells will be generated dynamically by script.js -->
+                    </div>
+                    <!-- Visual Scan Line Animation Overlay -->
+                    <div id="scan-line" class="scan-line hidden"></div>
+                </div>
+
+                <!-- Status Bar -->
+                <div class="status-bar">
+                    <span class="status-label">STATUS:</span>
+                    <span id="status-text" class="status-text ready">
+                        <i class="fa-solid fa-circle-check"></i> Ready
+                    </span>
+                </div>
+            </section>
+
+            <section class="controls-section">
+                <!-- Action Buttons -->
+                <div class="button-group">
+                    <button id="btn-solve" class="btn btn-primary" title="Solve using C backtracking">
+                        <i class="fa-solid fa-bolt"></i> Instant Solve
+                    </button>
+                    <button id="btn-visual-solve" class="btn btn-info" title="Animate the backtracking solver">
+                        <i class="fa-solid fa-play"></i> Visual Solve
+                    </button>
+                    <button id="btn-validate" class="btn btn-secondary" title="Check for duplicate numbers">
+                        <i class="fa-solid fa-shield-check"></i> Validate
+                    </button>
+                    <button id="btn-visualize" class="btn btn-secondary" title="Show algorithm explanation panel">
+                        <i class="fa-solid fa-diagram-project"></i> Visualize Algorithm
+                    </button>
+                    <button id="btn-load" class="btn btn-info" title="Load sample Sudoku board">
+                        <i class="fa-solid fa-rotate"></i> Load Sample
+                    </button>
+                    <button id="btn-reset" class="btn btn-danger" title="Clear all cells">
+                        <i class="fa-solid fa-trash-can"></i> Reset
+                    </button>
+                </div>
+
+                <div class="speed-control">
+                    <div class="speed-header">
+                        <span>VISUAL SPEED</span>
+                        <strong id="speed-label">Balanced</strong>
+                    </div>
+                    <div class="speed-row">
+                        <span>Slow</span>
+                        <input id="speed-slider" type="range" min="1" max="100" value="55" aria-label="Visualization speed">
+                        <span>Fast</span>
+                    </div>
+                </div>
+
+                <!-- Virtual Number Pad -->
+                <div class="virtual-keypad">
+                    <div class="keypad-title">VIRTUAL KEYPAD</div>
+                    <div class="keypad-keys">
+                        <button class="key-btn" data-val="1">1</button>
+                        <button class="key-btn" data-val="2">2</button>
+                        <button class="key-btn" data-val="3">3</button>
+                        <button class="key-btn" data-val="4">4</button>
+                        <button class="key-btn" data-val="5">5</button>
+                        <button class="key-btn" data-val="6">6</button>
+                        <button class="key-btn" data-val="7">7</button>
+                        <button class="key-btn" data-val="8">8</button>
+                        <button class="key-btn" data-val="9">9</button>
+                        <button class="key-btn key-btn-clear" data-val="clear" title="Clear cell">
+                            <i class="fa-solid fa-eraser"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Info Cards -->
+                <div class="info-card">
+                    <h3><i class="fa-solid fa-circle-info"></i> How it works</h3>
+                    <p>Enter your numbers directly by clicking a cell and using your keyboard (1-9) or use the virtual keypad. Press <kbd>Backspace</kbd> or <kbd>0</kbd> to clear. Navigate around the board using your <kbd>Arrow keys</kbd>.</p>
+                </div>
+
+                <div class="stats-card">
+                    <div class="panel-title">
+                        <i class="fa-solid fa-chart-line"></i>
+                        <span>Solver Statistics</span>
+                    </div>
+                    <div class="stats-grid">
+                        <span>Algorithm</span><strong id="stat-algorithm">Backtracking</strong>
+                        <span>Time Taken</span><strong id="stat-time">0.000 sec</strong>
+                        <span>Steps Tried</span><strong id="stat-steps">0</strong>
+                        <span>Backtracks</span><strong id="stat-backtracks">0</strong>
+                        <span>Difficulty</span><strong id="stat-difficulty">Empty</strong>
+                        <span>Status</span><strong id="stat-status">Ready</strong>
+                    </div>
+                </div>
+
+                <div id="algorithm-panel" class="algorithm-panel hidden">
+                    <div class="panel-title">
+                        <i class="fa-solid fa-route"></i>
+                        <span>Backtracking Visualizer</span>
+                    </div>
+                    <div class="step-meter">
+                        <span id="step-counter">Step 0 / 0</span>
+                        <div class="meter-track"><div id="step-progress" class="meter-fill"></div></div>
+                    </div>
+                    <div id="algorithm-current" class="algorithm-current">Select Visual Solve to watch each recursive decision.</div>
+                    <div id="recursion-tree" class="recursion-tree" aria-label="Recursion depth visualization"></div>
+                    <div id="algorithm-log" class="algorithm-log"></div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Automated Sudoku Solver © 2026. Made with <i class="fa-solid fa-heart animate-pulse"></i> for ADA Project.</p>
+        </footer>
+    </div>
+
+    <!-- Script file -->
+    <script src="script.js"></script>
+</body>
+</html>
